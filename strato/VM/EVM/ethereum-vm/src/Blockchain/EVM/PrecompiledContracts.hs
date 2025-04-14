@@ -44,6 +44,15 @@ sha2 input =
   --    in
   SHA2.hash input
 
+concatString :: B.ByteString -> B.ByteString -> B.ByteString
+concatString a b = 
+  if B.null a
+    then b
+    else if B.null b
+      then a
+      else
+        a `B.append` b
+
 callPrecompiledContract :: PrecompiledCode -> B.ByteString -> (Gas, B.ByteString)
 callPrecompiledContract NullContract _ = (0, B.empty)
 callPrecompiledContract ECRecover inputData =
@@ -62,3 +71,6 @@ callPrecompiledContract IdentityContract inputData = do
         gIDENTITYBASE
           + gIDENTITYWORD * (ceiling $ fromIntegral (B.length inputData) / (32 :: Double))
    in (gas, inputData)
+callPrecompiledContract concatString inputData1 inputData2 = do
+  let gas = B.length inputData1 + B.length inputData2
+   in (gas, concatString inputData1 inputData2)
